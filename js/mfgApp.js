@@ -8,7 +8,7 @@ if ("serviceWorker" in navigator) {
   }
 
 
-  //https://svgconverter.com/pdf-to-svg
+  // https://svgconverter.com/pdf-to-svg
   // step 1: split the full calendar into 4 qtr
   // step 2: save the XLSX to PDF format
   // step 3: convert the PDF version to SVG using above url
