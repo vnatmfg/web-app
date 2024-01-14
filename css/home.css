@@ -1,1 +1,3 @@
 .jumbotron:hover {background-color: rgb(195, 255, 252); transform: scale(1.05); transition: 0.3s;}
+.nav-tabs {padding: 10px;}
+.nav-item .active { background-color: #bebebe !important; color: #000000; border-radius: 6px;}
