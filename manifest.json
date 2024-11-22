@@ -7,7 +7,7 @@
     "id": "./index.html",
     "display_override": ["window-controls-overlay"],
     "display": "standalone",
-    "orientation": "landscape",
+    "orientation": "any",
     "theme_color": "#0071c5",
     "background_color": "#0071c5",
     "prefer_related_applications": false,
