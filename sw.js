@@ -2,7 +2,6 @@
 const cacheName = 'mfg-calendar-v1';
 const appAssets = [
   'index.html',
-  'css/images/',
   'css/home.css',
   'css/bootstrap.min.css',
 
