@@ -73,18 +73,28 @@
       </div>
     </main>
     <div class='onesignal-customlink-container'></div>
-    <!-- <script>
+    <script>
+      // if ('serviceWorker' in navigator) {
+      //   window.addEventListener('load', function() {
+      //     navigator.serviceWorker.register('sw.js', { scope: './' }).then(() => {
+      //       console.log('[Service Worker] Registered!');
+      //     }).catch((error) => {
+      //         console.warn('Error registering service worker:');
+      //         console.warn(error);
+      //     });
+      //   });
+      // }
+      //change sw.js to the name of your previous service worker file
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('sw.js', { scope: './' }).then(() => {
-            console.log('[Service Worker] Registered!');
-          }).catch((error) => {
-              console.warn('Error registering service worker:');
-              console.warn(error);
-          });
-        });
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            if (registration.active.scriptURL.includes("sw.js")) {
+              registration.unregister();
+            }
+          } 
+      });
       }
-    </script>     -->
+    </script>    
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
