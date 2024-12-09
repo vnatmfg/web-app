@@ -18,19 +18,16 @@ const firebaseConfig = {
   firebase.initializeApp(firebaseConfig);
   const messaging = firebase.messaging();
   
-  messaging.usePublicVapidKey("BGm3UwhwxQVG3yewULYAE2xmBYAPE3ERzaYvqCGLE98PINBtyMB9hevJ7BqAD6d57tMVmATpXqq1pkdoPDxec1A");
-  
-  messaging.requestPermission()
-    .then(() => {
-      console.log('Notification permission granted.');
-      return messaging.getToken();
-    })
-    .then((token) => {
-      console.log('FCM Token:', token);
-    })
-    .catch((err) => {
-      console.error('Unable to get permission to notify.', err);
-    });
+  messaging.getToken({ vapidKey: 'BGm3UwhwxQVG3yewULYAE2xmBYAPE3ERzaYvqCGLE98PINBtyMB9hevJ7BqAD6d57tMVmATpXqq1pkdoPDxec1A' }).then((currentToken) => {
+    if (currentToken) {
+        console.log(currentToken);
+    } else {
+      // Show permission request UI
+      console.log('No registration token available. Request permission to generate one.');
+    }
+  }).catch((err) => {
+    console.log('An error occurred while retrieving token. ', err);
+  });
   
   messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
