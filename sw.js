@@ -1,7 +1,6 @@
 // On install - the application shell cached
 const cacheName = 'mfg-calendar-v1';
 const appAssets = [
-  '/',
   'index.html',
   'css/images/',
   'css/home.css',
