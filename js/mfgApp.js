@@ -214,12 +214,8 @@ messaging.onMessage((payload) => {
                 // Optionally, focus the window or navigate to a specific page
                 window.focus();
             };       
-        } else {
-            showMessage("Notifications are not supported or permission is not granted.");
-        }
-    } catch (error) {
-        showMessage("Error displaying notification: ", error);
-    }
+        } else { showMessage("Notifications are not supported or permission is not granted.");}
+    } catch (error) { showMessage("Error displaying notification: ", error);}
 });
 
 window.addEventListener('load', () => {
