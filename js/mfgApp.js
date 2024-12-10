@@ -52,7 +52,7 @@ const getToken = (registration) => {
             }
         })
         .catch((err) => {
-            showMessage("An error occurred while retrieving token: " + err);
+            showMessage("An error occurred while retrieving token: " + err, true);
         });
 };
 const unsubscribeToken = (registration) => {
