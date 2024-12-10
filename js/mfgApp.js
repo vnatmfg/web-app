@@ -55,7 +55,7 @@ const getToken = (registration) => {
             }
         })
         .catch((err) => {
-            showMessage("An error occurred while retrieving token. Please grant notification permissions.");
+            console.log(err);
         });
 };
 const unsubscribeToken = (registration) => {
@@ -134,9 +134,11 @@ if ("serviceWorker" in navigator) {
                     resetInactivityTimer(registration)
                 );
             });
+            // Request notification permission
+            requestNotificationPermission();
         })
         .catch((err) => {
-            showMessage("An error occurred while retrieving token. Please grant notification permissions.");
+            console.log(err);
         });
 }
 messaging.onMessage((payload) => {
@@ -157,17 +159,37 @@ messaging.onMessage((payload) => {
 function showMessage(message) {
     const messageContainer = document.createElement('div');
     messageContainer.style.position = 'fixed';
-    messageContainer.style.bottom = '10px';
-    messageContainer.style.left = '10px';
-    messageContainer.style.padding = '10px';
-    messageContainer.style.backgroundColor = '#ff5858';
-    messageContainer.style.color = 'white';
+    messageContainer.style.top = '50%';
+    messageContainer.style.left = '50%';
+    messageContainer.style.transform = 'translate(-50%, -50%)';
+    messageContainer.style.padding = '10px 20px';
+    messageContainer.style.backgroundColor = '#e1e1e1a6';
+    messageContainer.style.color = '#000000';
     messageContainer.style.zIndex = '1000';
     messageContainer.style.borderRadius = '8px';
+    messageContainer.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+    messageContainer.style.textAlign = 'center';
+    messageContainer.style.fontSize = '16px';
     messageContainer.innerText = message;
     document.body.appendChild(messageContainer);
 
-    setTimeout(() => {
-        document.body.removeChild(messageContainer);
-    }, 5000); // Remove the message after 5 seconds
+    // setTimeout(() => {
+    //     document.body.removeChild(messageContainer);
+    // }, 5000); // Remove the message after 5 seconds
+}
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+                showMessage('Notification permission granted.');
+            } else {
+                showMessage('Notification permission denied.\nPlease grant notification permissions.');
+            }
+        }).catch((error) => {
+            showMessage('An error occurred while requesting notification permission.');
+            console.error('Notification permission error:', error);
+        });
+    } else {
+        showMessage('This browser does not support notifications.');
+    }
 }
