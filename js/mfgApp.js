@@ -134,8 +134,6 @@ if ("serviceWorker" in navigator) {
                     resetInactivityTimer(registration)
                 );
             });
-            // Request notification permission
-            requestNotificationPermission();
         })
         .catch((err) => {
             console.log(err);
@@ -198,9 +196,7 @@ function showMessage(message, showAllowButton = false) {
 function requestNotificationPermission() {
     if ('Notification' in window) {
         Notification.requestPermission().then((permission) => {
-            if (permission === 'granted') {
-                showMessage('Notification permission granted.');
-            } else {
+            if (permission !== 'granted') {
                 showMessage('Notification permission denied.\nPlease grant notification permissions.', true);
             }
         }).catch((error) => {
