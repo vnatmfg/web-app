@@ -151,19 +151,18 @@ messaging.onMessage((payload) => {
         body: payload.notification.body,
         icon: payload.notification.icon,
     };
-
     if (Notification.permission === "granted") {
         new Notification(notificationTitle, notificationOptions);
     }
 });
-function showMessage(message) {
+function showMessage(message, showAllowButton = false) {
     const messageContainer = document.createElement('div');
     messageContainer.style.position = 'fixed';
     messageContainer.style.top = '50%';
     messageContainer.style.left = '50%';
     messageContainer.style.transform = 'translate(-50%, -50%)';
-    messageContainer.style.padding = '20px 20px';
-    messageContainer.style.backgroundColor = 'rgb(225 225 225 / 75%)';
+    messageContainer.style.padding = '10px 20px';
+    messageContainer.style.backgroundColor = 'rgb(225 225 225 / 80%)';
     messageContainer.style.color = '#007bff';
     messageContainer.style.zIndex = '1000';
     messageContainer.style.borderRadius = '8px';
@@ -172,10 +171,28 @@ function showMessage(message) {
     messageContainer.style.fontSize = '16px';
     messageContainer.style.backdropFilter = 'blur(10px)';
     messageContainer.innerText = message;
-    document.body.appendChild(messageContainer);
 
+    if (showAllowButton) {
+        const allowButton = document.createElement('button');
+        allowButton.innerText = 'Allow';
+        allowButton.style.marginTop = '10px';
+        allowButton.style.padding = '5px 10px';
+        allowButton.style.backgroundColor = '#007bff';
+        allowButton.style.color = '#fff';
+        allowButton.style.border = 'none';
+        allowButton.style.borderRadius = '5px';
+        allowButton.style.cursor = 'pointer';
+        allowButton.addEventListener('click', () => {
+            requestNotificationPermission();
+            document.body.removeChild(messageContainer);
+        });
+        messageContainer.appendChild(allowButton);
+    }
+    document.body.appendChild(messageContainer);
     setTimeout(() => {
-        document.body.removeChild(messageContainer);
+        if (document.body.contains(messageContainer)) {
+            document.body.removeChild(messageContainer);
+        }
     }, 5000); // Remove the message after 5 seconds
 }
 function requestNotificationPermission() {
@@ -184,7 +201,7 @@ function requestNotificationPermission() {
             if (permission === 'granted') {
                 showMessage('Notification permission granted.');
             } else {
-                showMessage('Notification permission denied.\nPlease grant notification permissions.');
+                showMessage('Notification permission denied.\nPlease grant notification permissions.', true);
             }
         }).catch((error) => {
             showMessage('An error occurred while requesting notification permission.');
