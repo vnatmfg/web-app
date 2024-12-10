@@ -7,8 +7,7 @@ const appAssets = [
   'js/AddToHomeScreen.js',
   'js/jquery.min.js',
   'js/bootstrap.min.js',
-  'js/jquery-3.2.1.slim.min.js',
-  'js/mfgApp.js',
+  'js/jquery-3.2.1.slim.min.js'
 ];
 
 self.addEventListener('install', (e) => {

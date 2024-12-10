@@ -55,7 +55,7 @@ const getToken = (registration) => {
             }
         })
         .catch((err) => {
-            console.log("An error occurred while retrieving token. ", err);
+            showMessage("An error occurred while retrieving token. Please grant notification permissions.");
         });
 };
 const unsubscribeToken = (registration) => {
@@ -136,7 +136,7 @@ if ("serviceWorker" in navigator) {
             });
         })
         .catch((err) => {
-            console.log("Service worker registration failed, error:", err);
+            showMessage("An error occurred while retrieving token. Please grant notification permissions.");
         });
 }
 messaging.onMessage((payload) => {
@@ -154,3 +154,20 @@ messaging.onMessage((payload) => {
         new Notification(notificationTitle, notificationOptions);
     }
 });
+function showMessage(message) {
+    const messageContainer = document.createElement('div');
+    messageContainer.style.position = 'fixed';
+    messageContainer.style.bottom = '10px';
+    messageContainer.style.left = '10px';
+    messageContainer.style.padding = '10px';
+    messageContainer.style.backgroundColor = '#ff5858';
+    messageContainer.style.color = 'white';
+    messageContainer.style.zIndex = '1000';
+    messageContainer.style.borderRadius = '8px';
+    messageContainer.innerText = message;
+    document.body.appendChild(messageContainer);
+
+    setTimeout(() => {
+        document.body.removeChild(messageContainer);
+    }, 5000); // Remove the message after 5 seconds
+}
