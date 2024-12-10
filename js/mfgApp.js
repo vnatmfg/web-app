@@ -37,7 +37,7 @@ const getToken = (registration) => {
                 database.ref("fcmTokens/" + currentToken).once('value')
                     .then((snapshot) => {
                         if (snapshot.exists()) {
-                            console.log("Token already exists in the database." + currentToken);
+                            console.log("Token already exists in the database.");
                         } else {
                             // Store the token to the database
                             database.ref("fcmTokens/" + currentToken)
@@ -147,7 +147,7 @@ function showMessage(message, showAllowButton = false) {
 }
 function requestNotificationPermission() {
     if ('Notification' in window) {
-        const requestPermission = () => {
+        const requestPermission = async () => {
             Notification.requestPermission().then(permission => {
                 console.log(`Notifications are ${permission === 'granted' ? 'enabled' : 'not enabled. Asking for permission again on next load.'}`);
             });
@@ -162,7 +162,9 @@ function requestNotificationPermission() {
         showMessage('This browser does not support notifications.');
     }
 }
-if ("serviceWorker" in navigator) {
+if (('serviceWorker' in navigator) &&
+    ('PushManager' in window) &&
+    ('Notification' in window)) {
     navigator.serviceWorker
         .register(DEFAULT_SW_PATH, { scope: DEFAULT_SW_SCOPE })
         .then((registration) => {
@@ -175,7 +177,7 @@ if ("serviceWorker" in navigator) {
             });
             window.addEventListener('unload', () => {
                 unsubscribeToken(registration);
-            });            
+            });
         })
         .catch((err) => {
             console.error("Service worker registration failed: ", err);
