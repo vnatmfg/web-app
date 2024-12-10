@@ -54,7 +54,7 @@ const getToken = (registration) => {
         })
         .catch((err) => {
             console.error("An error occurred while retrieving token: ", err);
-            showMessage('An error occurred while retrieving token. Please try again.', true);
+            showMessage(err);
         });
 };
 const unsubscribeToken = (registration) => {
