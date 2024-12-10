@@ -19,11 +19,13 @@ const firebaseConfig = {
     messagingSenderId: "424979372254",
     appId: "1:424979372254:web:247f955d5a027065be4a4f",
     measurementId: "G-TYNJNC3EKQ",
+    databaseURL: "https://mfgcalendar-ff2ff-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
+const database = firebase.database();
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -45,8 +47,15 @@ const getToken = (registration) => {
         })
         .then((currentToken) => {
             if (currentToken) {
-                console.log(currentToken);
-                // Send the token to your server and update the UI if necessary
+                // Store the token to the database
+                firebase.database().ref('fcmTokens/' + currentToken).set({
+                    token: currentToken,
+                    timestamp: Date.now()
+                }).then(() => {
+                    console.log("Token stored successfully.");
+                }).catch((error) => {
+                    console.error("Error storing token: ", error);
+                });
             } else {
                 console.log("No registration token available. Request permission to generate one.");
             }
