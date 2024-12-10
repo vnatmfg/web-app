@@ -54,13 +54,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAJvkno-Q4aeH3wkYFxcoJSF8U_2uqpaS8",
-    authDomain: "mfgcalendar-ff2ff.firebaseapp.com",
-    projectId: "mfgcalendar-ff2ff",
-    storageBucket: "mfgcalendar-ff2ff.firebasestorage.app",
-    messagingSenderId: "424979372254",
-    appId: "1:424979372254:web:247f955d5a027065be4a4f",
-    measurementId: "G-TYNJNC3EKQ"
+  apiKey: "AIzaSyAJvkno-Q4aeH3wkYFxcoJSF8U_2uqpaS8",
+  authDomain: "mfgcalendar-ff2ff.firebaseapp.com",
+  projectId: "mfgcalendar-ff2ff",
+  storageBucket: "mfgcalendar-ff2ff.firebasestorage.app",
+  messagingSenderId: "424979372254",
+  appId: "1:424979372254:web:247f955d5a027065be4a4f",
+  measurementId: "G-TYNJNC3EKQ"
 };
 
 // Initialize Firebase
@@ -71,8 +71,8 @@ messaging.onBackgroundMessage((payload) => {
   // console.log('[firebase-messaging-sw.js] Received background message ', payload);
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
-      body: payload.notification.body,
-      icon: payload.notification.icon
+    body: payload.notification.body,
+    icon: payload.notification.icon
   };
   self.registration.showNotification(notificationTitle, notificationOptions);
 });

@@ -55,7 +55,7 @@ const getToken = (registration) => {
             showMessage("An error occurred while retrieving token: " + err, true);
         });
 };
-function unsubscribeNotifications() {
+const unsubscribeNotifications = function () {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then((registration) => {
             const messaging = firebase.messaging();
@@ -212,9 +212,9 @@ messaging.onMessage((payload) => {
                 clearBadgeCount();
                 // Optionally, focus the window or navigate to a specific page
                 window.focus();
-            };       
-        } else { showMessage("Notifications are not supported or permission is not granted.");}
-    } catch (error) { showMessage("Error displaying notification: ", error);}
+            };
+        } else { showMessage("Notifications are not supported or permission is not granted."); }
+    } catch (error) { showMessage("Error displaying notification: ", error); }
 });
 
 window.addEventListener('load', () => {
