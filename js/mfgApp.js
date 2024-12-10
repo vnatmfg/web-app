@@ -162,6 +162,13 @@ function requestNotificationPermission() {
         showMessage('This browser does not support notifications.');
     }
 }
+function clearBadgeCount() {
+    if ('clearAppBadge' in navigator) {
+        navigator.clearAppBadge().catch((error) => {
+            console.error("Error clearing app badge: ", error);
+        });
+    }
+}
 if (('serviceWorker' in navigator) &&
     ('PushManager' in window) &&
     ('Notification' in window)) {
@@ -192,11 +199,29 @@ messaging.onMessage((payload) => {
                 body: payload.notification.body,
                 icon: payload.notification.icon,
             };
-            new Notification(notificationTitle, notificationOptions);
+            const notification = new Notification(notificationTitle, notificationOptions);
+
+            // Set the badge count
+            if ('setAppBadge' in navigator) {
+                navigator.setAppBadge(1).catch((error) => {
+                    console.error("Error setting app badge: ", error);
+                });
+            }
+
+            // Clear the badge count when the notification is clicked
+            notification.onclick = () => {
+                clearBadgeCount();
+                // Optionally, focus the window or navigate to a specific page
+                window.focus();
+            };       
         } else {
             showMessage("Notifications are not supported or permission is not granted.");
         }
     } catch (error) {
         showMessage("Error displaying notification: ", error);
     }
+});
+
+window.addEventListener('load', () => {
+    clearBadgeCount();
 });
