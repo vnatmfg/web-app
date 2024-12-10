@@ -27,17 +27,6 @@ const app = firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 const database = firebase.database();
 
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-        .register(DEFAULT_SW_PATH, { scope: DEFAULT_SW_SCOPE })
-        .then((registration) => {
-            console.log("Registration successful, scope is:", registration.scope);
-            getToken(registration);
-        })
-        .catch((err) => {
-            console.log("Service worker registration failed, error:", err);
-        });
-}
 const getToken = (registration) => {
     const messaging = firebase.messaging();
     messaging
@@ -64,6 +53,83 @@ const getToken = (registration) => {
             console.log("An error occurred while retrieving token. ", err);
         });
 };
+const unsubscribeToken = (registration) => {
+    const messaging = firebase.messaging();
+    messaging
+        .getToken({
+            vapidKey: DEFAULT_VAPID_KEY,
+            serviceWorkerRegistration: registration,
+        })
+        .then((currentToken) => {
+            if (currentToken) {
+                messaging.deleteToken(currentToken).then(() => {
+                    console.log("Token deleted successfully.");
+                    // Optionally, remove the token from your database
+                    firebase.database().ref('fcmTokens/' + currentToken).remove()
+                        .then(() => {
+                            console.log("Token removed from database successfully.");
+                        })
+                        .catch((error) => {
+                            console.error("Error removing token from database: ", error);
+                        });
+                }).catch((error) => {
+                    console.error("Error deleting token: ", error);
+                });
+            } else {
+                console.log("No registration token available to delete.");
+            }
+        })
+        .catch((err) => {
+            console.log("An error occurred while retrieving token. ", err);
+        });
+};
+const unregisterServiceWorker = () => {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+            for (let registration of registrations) {
+                registration.unregister().then((boolean) => {
+                    console.log("Service worker unregistered: ", boolean);
+                }).catch((error) => {
+                    console.error("Error unregistering service worker: ", error);
+                });
+            }
+        });
+    }
+};
+const handleUserExit = (registration) => {
+    unsubscribeToken(registration);
+    unregisterServiceWorker();
+};
+
+// Set up inactivity timer
+let inactivityTimeout;
+const INACTIVITY_PERIOD = 86400000; // 24 hours
+
+const resetInactivityTimer = (registration) => {
+  clearTimeout(inactivityTimeout);
+  inactivityTimeout = setTimeout(() => {
+    handleUserExit(registration);
+  }, INACTIVITY_PERIOD);
+};
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+        .register(DEFAULT_SW_PATH, { scope: DEFAULT_SW_SCOPE })
+        .then((registration) => {
+            console.log("Registration successful, scope is:", registration.scope);
+            getToken(registration);
+            resetInactivityTimer(registration); // Set up inactivity timer
+
+            // Reset inactivity timer on user interaction
+            ['click', 'mousemove', 'keypress', 'scroll'].forEach(event => {
+                window.addEventListener(event, () => resetInactivityTimer(registration));
+            });            
+        })
+        .catch((err) => {
+            console.log("Service worker registration failed, error:", err);
+        });
+}
+
 messaging.onMessage((payload) => {
     console.log("[firebase-messaging-sw.js] Received foreground message ", payload);
     const notificationTitle = payload.notification.title;
