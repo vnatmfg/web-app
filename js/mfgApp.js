@@ -48,13 +48,11 @@ const getToken = (registration) => {
                     })
                     .catch((error) => { console.error("Error checking token existence: ", error); });
             } else {
-                console.log("No registration token available. Request permission to generate one.");
                 showMessage('No registration token available. Please grant notification permissions.', true);
             }
         })
         .catch((err) => {
-            console.error("An error occurred while retrieving token: ", err);
-            showMessage(err);
+            showMessage("An error occurred while retrieving token: ", err);
         });
 };
 const unsubscribeToken = (registration) => {
@@ -184,14 +182,21 @@ if ("serviceWorker" in navigator) {
             console.error("Service worker registration failed: ", err);
         });
 }
+
 messaging.onMessage((payload) => {
     console.log("[firebase-messaging-sw.js] Received foreground message ", payload);
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: payload.notification.icon,
-    };
-    if (Notification.permission === "granted") {
-        new Notification(notificationTitle, notificationOptions);
+    try {
+        if ('Notification' in window && Notification.permission === "granted") {
+            const notificationTitle = payload.notification.title;
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: payload.notification.icon,
+            };
+            new Notification(notificationTitle, notificationOptions);
+        } else {
+            showMessage("Notifications are not supported or permission is not granted.");
+        }
+    } catch (error) {
+        showMessage("Error displaying notification: ", error);
     }
 });
