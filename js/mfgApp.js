@@ -55,39 +55,38 @@ const getToken = (registration) => {
             showMessage("An error occurred while retrieving token: " + err, true);
         });
 };
-const unsubscribeToken = (registration) => {
-    const messaging = firebase.messaging();
-    messaging.getToken({
-        vapidKey: DEFAULT_VAPID_KEY,
-        serviceWorkerRegistration: registration,
-    }).then((currentToken) => {
-        if (currentToken) {
-            messaging
-                .deleteToken(currentToken)
-                .then(() => {
-                    console.log("Token deleted successfully.");
-                    // Optionally, remove the token from your database
-                    firebase
-                        .database()
-                        .ref("fcmTokens/" + currentToken)
-                        .remove()
-                        .then(() => {
+function unsubscribeNotifications() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+            const messaging = firebase.messaging();
+            messaging.getToken({
+                vapidKey: DEFAULT_VAPID_KEY,
+                serviceWorkerRegistration: registration,
+            }).then((currentToken) => {
+                if (currentToken) {
+                    messaging.deleteToken(currentToken).then(() => {
+                        console.log("Token deleted successfully.");
+                        // Optionally, remove the token from your database
+                        firebase.database().ref("fcmTokens/" + currentToken).remove().then(() => {
                             console.log("Token removed from database successfully.");
-                        })
-                        .catch((error) => {
+                            alert("You have been unsubscribed from notifications.");
+                        }).catch((error) => {
                             console.error("Error removing token from database: ", error);
                         });
-                })
-                .catch((error) => {
-                    console.error("Error deleting token: ", error);
-                });
-        } else {
-            console.log("No registration token available to delete.");
-        }
-    }).catch((err) => {
-        console.log("An error occurred while retrieving token: ", err);
-    });
-};
+                    }).catch((error) => {
+                        console.error("Error deleting token: ", error);
+                    });
+                } else {
+                    console.log("No registration token available to delete.");
+                }
+            }).catch((err) => {
+                console.log("An error occurred while retrieving token: ", err);
+            });
+        });
+    } else {
+        console.log("Service workers are not supported in this browser.");
+    }
+}
 const unregisterServiceWorker = () => {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -180,10 +179,10 @@ if (('serviceWorker' in navigator) &&
 
             // Add event listeners for beforeunload and unload events
             window.addEventListener('beforeunload', () => {
-                unsubscribeToken(registration);
+                unsubscribeNotifications();
             });
             window.addEventListener('unload', () => {
-                unsubscribeToken(registration);
+                unsubscribeNotifications();
             });
         })
         .catch((err) => {
@@ -220,4 +219,9 @@ messaging.onMessage((payload) => {
 
 window.addEventListener('load', () => {
     clearBadgeCount();
+});
+
+document.getElementById('unsubscribe-link').addEventListener('click', (event) => {
+    event.preventDefault();
+    unsubscribeNotifications();
 });
