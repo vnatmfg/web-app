@@ -155,7 +155,6 @@ function requestNotificationPermission() {
         if (Notification.permission === 'granted') {
             console.log('Notifications are enabled.');
         } else {
-            showMessage('Notification permission denied.\nPlease grant notification permissions.', true);
             requestPermission();
             window.addEventListener('load', requestPermission);
         }
@@ -182,9 +181,8 @@ if ("serviceWorker" in navigator) {
             console.error("Service worker registration failed: ", err);
         });
 }
-
 messaging.onMessage((payload) => {
-    console.log("[firebase-messaging-sw.js] Received foreground message ", payload);
+    // console.log("[firebase-messaging-sw.js] Received foreground message ", payload);
     try {
         if ('Notification' in window && Notification.permission === "granted") {
             const notificationTitle = payload.notification.title;
