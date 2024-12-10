@@ -52,7 +52,7 @@ const getToken = (registration) => {
             }
         })
         .catch((err) => {
-            showMessage("An error occurred while retrieving token: ", err);
+            showMessage("An error occurred while retrieving token: " + err);
         });
 };
 const unsubscribeToken = (registration) => {
@@ -85,7 +85,7 @@ const unsubscribeToken = (registration) => {
             console.log("No registration token available to delete.");
         }
     }).catch((err) => {
-        console.log("An error occurred while retrieving token. ", err);
+        console.log("An error occurred while retrieving token: ", err);
     });
 };
 const unregisterServiceWorker = () => {
