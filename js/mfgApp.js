@@ -2,9 +2,9 @@
 // step 1: split the full calendar into 4 qtr
 // step 2: save the XLSX to PDF format
 // step 3: convert the PDF version to SVG using above url
-
+let serviceWorkerRegistration;
 let inactivityTimeout;
-const INACTIVITY_PERIOD = 86400000; // 24 hours
+const INACTIVITY_PERIOD = 1000000; // 24 hours
 const DEFAULT_SW_PATH = "./sw.js";
 const DEFAULT_SW_SCOPE = "./";
 const ENDPOINT = "https://fcmregistrations.googleapis.com/v1";
@@ -26,7 +26,6 @@ const messaging = firebase.messaging();
 const database = firebase.database();
 
 const getToken = (registration) => {
-    const messaging = firebase.messaging();
     messaging
         .getToken({
             vapidKey: DEFAULT_VAPID_KEY,
@@ -34,72 +33,68 @@ const getToken = (registration) => {
         })
         .then((currentToken) => {
             if (currentToken) {
-                // Store the token to the database
-                firebase
-                    .database()
-                    .ref("fcmTokens/" + currentToken)
-                    .set({
-                        token: currentToken,
-                        timestamp: Date.now(),
+                // Check if the token already exists in the database
+                database.ref("fcmTokens/" + currentToken).once('value')
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            console.log("Token already exists in the database." + currentToken);
+                        } else {
+                            // Store the token to the database
+                            database.ref("fcmTokens/" + currentToken)
+                                .set({ token: currentToken, timestamp: Date.now(), })
+                                .then(() => { console.log("Token stored successfully."); })
+                                .catch((error) => { console.error("Error storing token: ", error); });
+                        }
                     })
-                    .then(() => {
-                        console.log("Token stored successfully.");
-                    })
-                    .catch((error) => {
-                        console.error("Error storing token: ", error);
-                    });
+                    .catch((error) => { console.error("Error checking token existence: ", error); });
             } else {
-                console.log(
-                    "No registration token available. Request permission to generate one."
-                );
+                console.log("No registration token available. Request permission to generate one.");
+                showMessage('No registration token available. Please grant notification permissions.', true);
             }
         })
         .catch((err) => {
-            console.log(err);
+            console.error("An error occurred while retrieving token: ", err);
+            showMessage('An error occurred while retrieving token. Please try again.', true);
         });
 };
 const unsubscribeToken = (registration) => {
     const messaging = firebase.messaging();
-    messaging
-        .getToken({
-            vapidKey: DEFAULT_VAPID_KEY,
-            serviceWorkerRegistration: registration,
-        })
-        .then((currentToken) => {
-            if (currentToken) {
-                messaging
-                    .deleteToken(currentToken)
-                    .then(() => {
-                        console.log("Token deleted successfully.");
-                        // Optionally, remove the token from your database
-                        firebase
-                            .database()
-                            .ref("fcmTokens/" + currentToken)
-                            .remove()
-                            .then(() => {
-                                console.log("Token removed from database successfully.");
-                            })
-                            .catch((error) => {
-                                console.error("Error removing token from database: ", error);
-                            });
-                    })
-                    .catch((error) => {
-                        console.error("Error deleting token: ", error);
-                    });
-            } else {
-                console.log("No registration token available to delete.");
-            }
-        })
-        .catch((err) => {
-            console.log("An error occurred while retrieving token. ", err);
-        });
+    messaging.getToken({
+        vapidKey: DEFAULT_VAPID_KEY,
+        serviceWorkerRegistration: registration,
+    }).then((currentToken) => {
+        if (currentToken) {
+            messaging
+                .deleteToken(currentToken)
+                .then(() => {
+                    console.log("Token deleted successfully.");
+                    // Optionally, remove the token from your database
+                    firebase
+                        .database()
+                        .ref("fcmTokens/" + currentToken)
+                        .remove()
+                        .then(() => {
+                            console.log("Token removed from database successfully.");
+                        })
+                        .catch((error) => {
+                            console.error("Error removing token from database: ", error);
+                        });
+                })
+                .catch((error) => {
+                    console.error("Error deleting token: ", error);
+                });
+        } else {
+            console.log("No registration token available to delete.");
+        }
+    }).catch((err) => {
+        console.log("An error occurred while retrieving token. ", err);
+    });
 };
 const unregisterServiceWorker = () => {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
             for (let registration of registrations) {
-                registration
-                    .unregister()
+                registration.unregister()
                     .then((boolean) => {
                         console.log("Service worker unregistered: ", boolean);
                     })
@@ -110,49 +105,6 @@ const unregisterServiceWorker = () => {
         });
     }
 };
-const handleUserExit = (registration) => {
-    unsubscribeToken(registration);
-    unregisterServiceWorker();
-};
-const resetInactivityTimer = (registration) => {
-    clearTimeout(inactivityTimeout);
-    inactivityTimeout = setTimeout(() => {
-        handleUserExit(registration);
-    }, INACTIVITY_PERIOD);
-};
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-        .register(DEFAULT_SW_PATH, { scope: DEFAULT_SW_SCOPE })
-        .then((registration) => {
-            console.log("Registration successful, scope is:", registration.scope);
-            getToken(registration);
-            resetInactivityTimer(registration); // Set up inactivity timer
-
-            // Reset inactivity timer on user interaction
-            ["click", "mousemove", "keypress", "scroll"].forEach((event) => {
-                window.addEventListener(event, () =>
-                    resetInactivityTimer(registration)
-                );
-            });
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-}
-messaging.onMessage((payload) => {
-    console.log(
-        "[firebase-messaging-sw.js] Received foreground message ",
-        payload
-    );
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: payload.notification.icon,
-    };
-    if (Notification.permission === "granted") {
-        new Notification(notificationTitle, notificationOptions);
-    }
-});
 function showMessage(message, showAllowButton = false) {
     const messageContainer = document.createElement('div');
     messageContainer.style.position = 'fixed';
@@ -186,7 +138,9 @@ function showMessage(message, showAllowButton = false) {
         });
         messageContainer.appendChild(allowButton);
     }
+
     document.body.appendChild(messageContainer);
+
     setTimeout(() => {
         if (document.body.contains(messageContainer)) {
             document.body.removeChild(messageContainer);
@@ -195,15 +149,49 @@ function showMessage(message, showAllowButton = false) {
 }
 function requestNotificationPermission() {
     if ('Notification' in window) {
-        Notification.requestPermission().then((permission) => {
-            if (permission !== 'granted') {
-                showMessage('Notification permission denied.\nPlease grant notification permissions.', true);
-            }
-        }).catch((error) => {
-            showMessage('An error occurred while requesting notification permission.');
-            console.error('Notification permission error:', error);
-        });
+        const requestPermission = () => {
+            Notification.requestPermission().then(permission => {
+                console.log(`Notifications are ${permission === 'granted' ? 'enabled' : 'not enabled. Asking for permission again on next load.'}`);
+            });
+        };
+        if (Notification.permission === 'granted') {
+            console.log('Notifications are enabled.');
+        } else {
+            showMessage('Notification permission denied.\nPlease grant notification permissions.', true);
+            requestPermission();
+            window.addEventListener('load', requestPermission);
+        }
     } else {
         showMessage('This browser does not support notifications.');
     }
 }
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+        .register(DEFAULT_SW_PATH, { scope: DEFAULT_SW_SCOPE })
+        .then((registration) => {
+            console.log("Registration successful, scope is:", registration.scope);
+            getToken(registration);
+
+            // Add event listeners for beforeunload and unload events
+            window.addEventListener('beforeunload', () => {
+                unsubscribeToken(registration);
+            });
+            window.addEventListener('unload', () => {
+                unsubscribeToken(registration);
+            });            
+        })
+        .catch((err) => {
+            console.error("Service worker registration failed: ", err);
+        });
+}
+messaging.onMessage((payload) => {
+    console.log("[firebase-messaging-sw.js] Received foreground message ", payload);
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: payload.notification.icon,
+    };
+    if (Notification.permission === "granted") {
+        new Notification(notificationTitle, notificationOptions);
+    }
+});
