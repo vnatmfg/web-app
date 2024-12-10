@@ -174,9 +174,9 @@ function showMessage(message) {
     messageContainer.innerText = message;
     document.body.appendChild(messageContainer);
 
-    // setTimeout(() => {
-    //     document.body.removeChild(messageContainer);
-    // }, 5000); // Remove the message after 5 seconds
+    setTimeout(() => {
+        document.body.removeChild(messageContainer);
+    }, 5000); // Remove the message after 5 seconds
 }
 function requestNotificationPermission() {
     if ('Notification' in window) {
