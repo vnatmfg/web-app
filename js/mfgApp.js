@@ -162,14 +162,15 @@ function showMessage(message) {
     messageContainer.style.top = '50%';
     messageContainer.style.left = '50%';
     messageContainer.style.transform = 'translate(-50%, -50%)';
-    messageContainer.style.padding = '10px 20px';
-    messageContainer.style.backgroundColor = '#e1e1e1a6';
-    messageContainer.style.color = '#000000';
+    messageContainer.style.padding = '20px 20px';
+    messageContainer.style.backgroundColor = 'rgb(225 225 225 / 75%)';
+    messageContainer.style.color = '#007bff';
     messageContainer.style.zIndex = '1000';
     messageContainer.style.borderRadius = '8px';
-    messageContainer.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+    messageContainer.style.boxShadow = 'rgb(0 0 0 / 50%) 0px 2px 10px';
     messageContainer.style.textAlign = 'center';
     messageContainer.style.fontSize = '16px';
+    messageContainer.style.backdropFilter = 'blur(10px)';
     messageContainer.innerText = message;
     document.body.appendChild(messageContainer);
 
