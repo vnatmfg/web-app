@@ -18,12 +18,23 @@ const firebaseConfig = {
     messagingSenderId: "424979372254",
     appId: "1:424979372254:web:247f955d5a027065be4a4f",
     measurementId: "G-TYNJNC3EKQ",
-    databaseURL:
-        "https://mfgcalendar-ff2ff-default-rtdb.asia-southeast1.firebasedatabase.app",
+    databaseURL: "https://mfgcalendar-ff2ff-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 const app = firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 const database = firebase.database();
+const auth = firebase.auth();
+
+// Initialize the Microsoft provider
+const provider = new firebase.auth.OAuthProvider('microsoft.com');
+
+// Set custom parameters if needed
+provider.setCustomParameters({
+  prompt: 'consent',
+  login_hint: 'user@firstadd.onmicrosoft.com',
+  tenant: '46c98d88-e344-4ed4-8496-4ed7712e255d' // Replace with your tenant ID
+});
+
 
 const getToken = (registration) => {
     messaging
@@ -225,3 +236,17 @@ document.getElementById('unsubscribe-link').addEventListener('click', (event) =>
     event.preventDefault();
     unsubscribeNotifications();
 });
+
+// Function to handle sign-in with redirect
+firebase.auth().signInWithRedirect(provider);
+firebase.auth().getRedirectResult()
+    .then((result) => {
+      var credential = result.credential;
+      var accessToken = credential.accessToken;
+      var idToken = credential.idToken;
+      console.log('Access Token:', accessToken);
+      console.log('ID Token:', idToken);
+    })
+    .catch((error) => {
+      console.error('Error during redirect sign-in:', error);
+    });
