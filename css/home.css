@@ -7,7 +7,7 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
 .nav a { text-decoration: none;}
 @media (max-width: 390px) { .nav-deactivate { display: none;}}
 @media (max-width: 576px) { .nav-deactivate { display: none;}}
-@media (max-width: 768px) {}
+@media (min-width: 768px) { .nav-username {display: none;}}
 @media (max-width: 992px) {}
 @media (max-width: 1200px){}
 

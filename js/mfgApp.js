@@ -4,12 +4,12 @@
 // step 3: convert the PDF version to SVG using above url
 let serviceWorkerRegistration;
 let inactivityTimeout;
+let authUser;
 const INACTIVITY_PERIOD = 1000000; // 24 hours
 const DEFAULT_SW_PATH = "./sw.js";
 const DEFAULT_SW_SCOPE = "./";
 const ENDPOINT = "https://fcmregistrations.googleapis.com/v1";
-const DEFAULT_VAPID_KEY =
-    "BDOU99-h67HcA6JeFXHbSNMu7e2yNNu3RzoMj8TM4W88jITfq7ZmPvIM1Iv-4_l2LxQcYwhqby2xGpWwzjfAnG4";
+const DEFAULT_VAPID_KEY = "BDOU99-h67HcA6JeFXHbSNMu7e2yNNu3RzoMj8TM4W88jITfq7ZmPvIM1Iv-4_l2LxQcYwhqby2xGpWwzjfAnG4";
 const firebaseConfig = {
     apiKey: "AIzaSyAJvkno-Q4aeH3wkYFxcoJSF8U_2uqpaS8",
     authDomain: "mfgcalendar-ff2ff.firebaseapp.com",
@@ -23,55 +23,208 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 const database = firebase.database();
-const auth = firebase.auth();
 
-// Initialize the Microsoft provider
-const provider = new firebase.auth.OAuthProvider('microsoft.com');
 
-// Set custom parameters if needed
-provider.setCustomParameters({
-  prompt: 'consent',
-  login_hint: 'user@firstadd.onmicrosoft.com',
-  tenant: '46c98d88-e344-4ed4-8496-4ed7712e255d' // Replace with your tenant ID
+//===========================
+// MS Graph API Configuration
+//===========================
+// Config object to be passed to Msal on creation
+const hostname = window.location.hostname;
+const msalConfig = {
+    auth: {
+        clientId: "47d059bf-dd89-43bd-862f-db8766ee7f8f",
+        authority: "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d",
+        // redirectUri: `https://${hostname}/web-app`
+    },
+    cache: {
+        cacheLocation: "sessionStorage", // This configures where your cache will be stored
+        storeAuthStateInCookie: true, // Set this to "true" if you are having issues on IE11 or Edge
+    },
+    system: {
+        allowNativeBroker: false, // Disables WAM Broker
+        loggerOptions: {
+            loggerCallback: (level, message, containsPii) => {
+                if (containsPii) {
+                    return;
+                }
+                switch (level) {
+                    case msal.LogLevel.Error:
+                        console.error(message);
+                        return;
+                    case msal.LogLevel.Info:
+                        console.info(message);
+                        return;
+                    case msal.LogLevel.Verbose:
+                        console.debug(message);
+                        return;
+                    case msal.LogLevel.Warning:
+                        console.warn(message);
+                        return;
+                }
+            }
+        }
+    }
+};
+
+// Add here scopes for id token to be used at MS Identity Platform endpoints.
+const loginRequest = {
+    scopes: ["openid", "profile", "User.Read"]
+};
+
+// Add here the endpoints for MS Graph API services you would like to use.
+const graphConfig = {
+    graphMeEndpoint: "https://graph.microsoft.com/v1.0/me"
+};
+
+
+//===========================
+// MS Graph API authentication
+//===========================
+/*
+ * Browser check variables
+ * If you support IE, our recommendation is that you sign-in using Redirect APIs
+ * If you as a developer are testing using Edge InPrivate mode, please add "isEdge" to the if check
+ */
+const ua = window.navigator.userAgent;
+const msie = ua.indexOf("MSIE ");
+const msie11 = ua.indexOf("Trident/");
+const msedge = ua.indexOf("Edge/");
+const isIE = msie > 0 || msie11 > 0;
+const isEdge = msedge > 0;
+
+let signInType;
+let accountId = "";
+
+/*
+ * Create the main myMSALObj instance
+ * configuration parameters are located at authConfig.js
+ */
+const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+// Register Callbacks for Redirect flow
+myMSALObj.handleRedirectPromise().then(handleResponse).catch((error) => {
+    console.log(error);
 });
 
+function handleResponse(resp) {
+    if (resp !== null) {
+        accountId = resp.account.homeAccountId;
+        seeProfileRedirect();
+    } else {
+        // need to call getAccount here?
+        const currentAccounts = myMSALObj.getAllAccounts();
+        if (!currentAccounts || currentAccounts.length < 1) {
+            signIn("loginRedirect");
+        } else if (currentAccounts.length > 1) {
+            // Add choose account code here
+        } else if (currentAccounts.length === 1) {
+            accountId = currentAccounts[0].homeAccountId;
+            seeProfileRedirect();
+        }
+    }
+}
 
-      // Function to handle sign-in with popup
-      firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-          // IdP data available in result.additionalUserInfo.profile.
-          // ...
-
-          /** @type {firebase.auth.OAuthCredential} */
-          var credential = result.credential;
-
-          // OAuth access and id tokens can also be retrieved:
-          var accessToken = credential.accessToken;
-          var idToken = credential.idToken;
-          var user = result.user;
-          console.log(user.email);
-          // Check if the user's email ends with ".intel.com"
-          if (user.email.endsWith('@intel.com')) {
-            // Store user info in session storage
-            sessionStorage.setItem('user', JSON.stringify(user));
-
-            // Store the token to the database
-            if (serviceWorkerRegistration) {
-              getToken(serviceWorkerRegistration);
-            }
-
-            // Set flag to indicate redirect result has been processed
-            sessionStorage.setItem('redirectProcessed', 'true');
-          } else {
-            console.error('Unauthorized email domain');
-            // Optionally, sign out the user if the email domain is not authorized
-            firebase.auth().signOut();
-          }
-        })
-        .catch((error) => {
-          console.error('Error during sign-in with popup:', error);
+async function signIn(method) {
+    signInType = isIE ? "loginRedirect" : method;
+    if (signInType === "loginPopup") {
+        return myMSALObj.loginPopup(loginRequest).then(handleResponse).catch(function (error) {
+            console.log(error);
         });
+    } else if (signInType === "loginRedirect") {
+        return myMSALObj.loginRedirect(loginRequest);
+    }
+}
 
+// This function can be removed if you do not need to support IE
+async function getTokenRedirect(request, account) {
+    request.account = account;
+    return await myMSALObj.acquireTokenSilent(request).catch(async (error) => {
+        console.log("silent token acquisition fails.");
+        if (error instanceof msal.InteractionRequiredAuthError) {
+            // fallback to interaction when silent call fails
+            console.log("acquiring token using redirect");
+            myMSALObj.acquireTokenRedirect(request);
+        } else {
+            console.error(error);
+        }
+    });
+}
+
+//===========================
+// MS Graph API call
+//===========================
+
+// Helper function to call MS Graph API endpoint 
+// using authorization bearer token scheme
+async function callMSGraph(endpoint, accessToken, method = 'GET', payload = null, isPhoto = false) {
+    const headers = new Headers();
+    const bearer = `Bearer ${accessToken}`;
+
+    headers.append("Authorization", bearer);
+    if (method === 'POST') {
+        headers.append("Content-Type", "application/json");
+    }
+
+    const options = {
+        method: method,
+        headers: headers
+    };
+
+    if (method === 'POST' && payload) {
+        options.body = JSON.stringify(payload);
+    }
+
+    return fetch(endpoint, options)
+        .then(response => isPhoto ? response.blob() : response.json())
+        .then(data => {
+            if (isPhoto) {
+                // Convert blob to base64
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(data);
+                });
+            } else {
+                return data;
+            }
+        })
+        .catch(error => console.error(error));
+}
+async function seeProfileRedirect() {
+    const currentAcc = myMSALObj.getAccountByHomeId(accountId);
+    if (currentAcc) {
+        const response = await getTokenRedirect(loginRequest, currentAcc).catch(error => {
+            console.log(error);
+        });
+        if (response) {
+            const profileInfo = await callMSGraph(graphConfig.graphMeEndpoint, response.accessToken);
+            sessionStorage.setItem("msalUserInfo", JSON.stringify(profileInfo));
+            initializeApp();
+        }
+    }
+}
+
+function initializeApp() {
+    const msalUserInfo = JSON.parse(sessionStorage.getItem('msalUserInfo'));
+    if (msalUserInfo) {
+        console.log('User authenticated:', msalUserInfo);
+        sessionStorage.setItem('authUser', JSON.stringify(msalUserInfo));
+        
+        // Set the displayName to the element with ID 'username-link'
+        const usernameLink = document.getElementById('username-link');
+        if (usernameLink) {
+            usernameLink.innerText = msalUserInfo.displayName;
+        }
+
+        if (serviceWorkerRegistration) {
+            getToken(serviceWorkerRegistration);
+        }
+    } else {
+        console.log('User not authenticated, redirecting...');
+        signIn();
+    }
+}
 
 const getToken = (registration) => {
     messaging
