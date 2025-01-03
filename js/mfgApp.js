@@ -52,7 +52,7 @@ const msalConfig = {
                         console.error(message);
                         return;
                     case msal.LogLevel.Info:
-                        console.info(message);
+                        // console.info(message);
                         return;
                     case msal.LogLevel.Verbose:
                         console.debug(message);
@@ -208,13 +208,18 @@ async function seeProfileRedirect() {
 function initializeApp() {
     const msalUserInfo = JSON.parse(sessionStorage.getItem('msalUserInfo'));
     if (msalUserInfo) {
-        console.log('User authenticated:', msalUserInfo);
         sessionStorage.setItem('authUser', JSON.stringify(msalUserInfo));
         
         // Set the displayName to the element with ID 'username-link'
         const usernameLink = document.getElementById('username-link');
         if (usernameLink) {
             usernameLink.innerText = msalUserInfo.displayName;
+        }
+
+        // Show the main tab
+        const mainElement = document.querySelector('main');
+        if (mainElement) {
+            mainElement.removeAttribute('hidden');
         }
 
         if (serviceWorkerRegistration) {
