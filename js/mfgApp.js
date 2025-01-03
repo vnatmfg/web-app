@@ -36,6 +36,43 @@ provider.setCustomParameters({
 });
 
 
+      // Function to handle sign-in with popup
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          // IdP data available in result.additionalUserInfo.profile.
+          // ...
+
+          /** @type {firebase.auth.OAuthCredential} */
+          var credential = result.credential;
+
+          // OAuth access and id tokens can also be retrieved:
+          var accessToken = credential.accessToken;
+          var idToken = credential.idToken;
+          var user = result.user;
+          console.log(user.email);
+          // Check if the user's email ends with ".intel.com"
+          if (user.email.endsWith('@intel.com')) {
+            // Store user info in session storage
+            sessionStorage.setItem('user', JSON.stringify(user));
+
+            // Store the token to the database
+            if (serviceWorkerRegistration) {
+              getToken(serviceWorkerRegistration);
+            }
+
+            // Set flag to indicate redirect result has been processed
+            sessionStorage.setItem('redirectProcessed', 'true');
+          } else {
+            console.error('Unauthorized email domain');
+            // Optionally, sign out the user if the email domain is not authorized
+            firebase.auth().signOut();
+          }
+        })
+        .catch((error) => {
+          console.error('Error during sign-in with popup:', error);
+        });
+
+
 const getToken = (registration) => {
     messaging
         .getToken({
@@ -186,7 +223,8 @@ if (('serviceWorker' in navigator) &&
         .register(DEFAULT_SW_PATH, { scope: DEFAULT_SW_SCOPE })
         .then((registration) => {
             console.log("Registration successful, scope is:", registration.scope);
-            getToken(registration);
+            serviceWorkerRegistration = registration;
+            // getToken(registration);
 
             // Add event listeners for beforeunload and unload events
             window.addEventListener('beforeunload', () => {
@@ -237,16 +275,3 @@ document.getElementById('unsubscribe-link').addEventListener('click', (event) =>
     unsubscribeNotifications();
 });
 
-// Function to handle sign-in with redirect
-firebase.auth().signInWithRedirect(provider);
-firebase.auth().getRedirectResult()
-    .then((result) => {
-      var credential = result.credential;
-      var accessToken = credential.accessToken;
-      var idToken = credential.idToken;
-      console.log('Access Token:', accessToken);
-      console.log('ID Token:', idToken);
-    })
-    .catch((error) => {
-      console.error('Error during redirect sign-in:', error);
-    });
