@@ -209,7 +209,7 @@ function initializeApp() {
     const msalUserInfo = JSON.parse(sessionStorage.getItem('msalUserInfo'));
     if (msalUserInfo) {
         sessionStorage.setItem('authUser', JSON.stringify(msalUserInfo));
-        
+
         // Set the displayName to the element with ID 'username-link'
         const usernameLink = document.getElementById('username-link');
         if (usernameLink) {
