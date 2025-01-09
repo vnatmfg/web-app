@@ -365,6 +365,7 @@ function storeNotification(notification) {
     let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
     notifications.push(notification);
     localStorage.setItem('notifications', JSON.stringify(notifications));
+    updateBadgeCount(); // Update the badge count
 }
 function displayStoredNotifications() {
     const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
@@ -386,6 +387,7 @@ function displayStoredNotifications() {
 function clearNotifications() {
     localStorage.removeItem('notifications');
     displayStoredNotifications();
+    updateBadgeCount(); // Update the badge count
 }
 function requestNotificationPermission() {
     if ('Notification' in window) {
@@ -402,6 +404,24 @@ function requestNotificationPermission() {
         }
     } else {
         showMessage('This browser does not support notifications.');
+    }
+}
+function updateBadgeCount() {
+    const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+    const count = notifications.length;
+    const badge = document.getElementById('notification_badge');
+
+    if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline';
+    } else {
+        badge.style.display = 'none';
+    }
+
+    if ('setAppBadge' in navigator) {
+        navigator.setAppBadge(count).catch((error) => {
+            console.error("Error setting app badge: ", error);
+        });
     }
 }
 function clearBadgeCount() {
@@ -449,16 +469,11 @@ messaging.onMessage((payload) => {
             storeNotification(payload.notification);
 
             // Set the badge count
-            if ('setAppBadge' in navigator) {
-                navigator.setAppBadge(1).catch((error) => {
-                    console.error("Error setting app badge: ", error);
-                });
-            }
+            updateBadgeCount();
 
             // Clear the badge count when the notification is clicked
             notification.onclick = () => {
                 clearBadgeCount();
-                // Optionally, focus the window or navigate to a specific page
                 window.focus();
             };
         } else { showMessage("Notifications are not supported or permission is not granted."); }
@@ -469,6 +484,8 @@ window.addEventListener('load', () => {
 });
 document.addEventListener("DOMContentLoaded", function() {
     displayStoredNotifications();
+    updateBadgeCount(); // Update the badge count on page load
+
     const loadBase64Image = async (imgElementId, txtFilePath) => {
         try {
             const response = await fetch(txtFilePath);
