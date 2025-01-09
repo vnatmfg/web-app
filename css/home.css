@@ -24,11 +24,11 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 89px;
-  height: 89px;
+  width: 69px;
+  height: 69px;
   margin: -25px 0 0 -25px;
-  border: 10px solid rgba(0, 0, 0, 0.1);
-  border-top: 10px solid #0071c5;
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-top: 5px solid #0071c5;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
