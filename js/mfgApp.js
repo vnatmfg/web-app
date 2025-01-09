@@ -427,7 +427,6 @@ messaging.onMessage((payload) => {
 window.addEventListener('load', () => {
     clearBadgeCount();
 });
-
 document.addEventListener("DOMContentLoaded", function() {
     const loadBase64Image = async (imgElementId, txtFilePath) => {
         try {
