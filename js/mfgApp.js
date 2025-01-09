@@ -352,6 +352,15 @@ function showMessage(message, showAllowButton = false) {
         }
     }, 5000); // Remove the message after 5 seconds
 }
+function toggleNotificationContainer() {
+    const notificationContainer = document.getElementById("notification-container");
+    if (notificationContainer.style.display === "none" || notificationContainer.style.display === "") {
+        notificationContainer.style.display = "block";        
+        displayStoredNotifications();
+    } else {
+        notificationContainer.style.display = "none";
+    }
+}
 function storeNotification(notification) {
     let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
     notifications.push(notification);
@@ -418,7 +427,6 @@ if (('serviceWorker' in navigator) &&
         });
 }
 messaging.onMessage((payload) => {
-    // console.log("[firebase-messaging-sw.js] Received foreground message ", payload);
     try {
         if ('Notification' in window && Notification.permission === "granted") {
             const notificationTitle = payload.notification.title;
@@ -501,5 +509,10 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         toggleSubscription();
     });
-
+    // Add event listener to the bell icon
+    const notificationBell = document.getElementById("notification_bell");
+    notificationBell.addEventListener("click", function(event) {
+        event.preventDefault();
+        toggleNotificationContainer();
+    });
 });

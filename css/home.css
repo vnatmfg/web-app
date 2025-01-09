@@ -37,6 +37,46 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.notification-container {
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  width: 300px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 15px;
+}
+
+.notification-container h3 {
+  margin-top: 0;
+}
+
+.notification-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.notification-container ul li {
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-container button {
+  background-color: #67b6ff;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.notification-container button:hover {
+  background-color: #347fc5;
+}
 
 ::-webkit-scrollbar {
     width: 10px;
