@@ -6,7 +6,7 @@
 let serviceWorkerRegistration;
 let inactivityTimeout;
 let authUser;
-const VERSION = "v1.0.1";
+const VERSION = "v1.0.2";
 const AUTH_TENANT = "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d";
 const CLIENT_ID = "47d059bf-dd89-43bd-862f-db8766ee7f8f";
 const INACTIVITY_PERIOD = 1000000; // 24 hours
@@ -132,7 +132,7 @@ function showSpinner() {
 }
 
 function hideSpinner() {
-    document.getElementById("spinner").style.display = "none";
+    // document.getElementById("spinner").style.display = "none";
 }
 
 async function signIn(method) {
@@ -443,18 +443,18 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error("Error loading base64 image:", error);
         }
     };
-
     showSpinner();
-
     Promise.all([
         loadBase64Image("q1-img", "images/ShiftCalendar_2025_Q1.txt"),
         loadBase64Image("q2-img", "images/ShiftCalendar_2025_Q2.txt"),
         loadBase64Image("q3-img", "images/ShiftCalendar_2025_Q3.txt"),
         loadBase64Image("q4-img", "images/ShiftCalendar_2025_Q4.txt")
     ]).then(() => {
-        hideSpinner();
+        setTimeout(() => {
+            // hideSpinner();
+        }, 1000);
     }).catch(error => {
         console.error("Error loading images:", error);
-        hideSpinner();
+        // hideSpinner();
     });
 });
