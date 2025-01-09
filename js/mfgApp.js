@@ -420,13 +420,26 @@ messaging.onMessage((payload) => {
         } else { showMessage("Notifications are not supported or permission is not granted."); }
     } catch (error) { showMessage("Error displaying notification: ", error); }
 });
-
 window.addEventListener('load', () => {
     clearBadgeCount();
 });
-
 document.getElementById('unsubscribe_link').addEventListener('click', (event) => {
     event.preventDefault();
     unsubscribeNotifications();
 });
-
+document.addEventListener("DOMContentLoaded", function() {
+    const loadBase64Image = async (imgElementId, txtFilePath) => {
+        try {
+            const response = await fetch(txtFilePath);
+            const base64Data = await response.text();
+            const imgElement = document.getElementById(imgElementId);
+            imgElement.src = `data:image/svg+xml;base64,${base64Data}`;
+        } catch (error) {
+            console.error("Error loading base64 image:", error);
+        }
+    };
+    loadBase64Image("q1-img", "images/ShiftCalendar_2025_Q1.txt");
+    loadBase64Image("q2-img", "images/ShiftCalendar_2025_Q2.txt");
+    loadBase64Image("q3-img", "images/ShiftCalendar_2025_Q3.txt");
+    loadBase64Image("q4-img", "images/ShiftCalendar_2025_Q4.txt");
+});
