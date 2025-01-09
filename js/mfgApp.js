@@ -2,9 +2,13 @@
 // step 1: split the full calendar into 4 qtr
 // step 2: save the XLSX to PDF format
 // step 3: convert the PDF version to SVG using above url
+
 let serviceWorkerRegistration;
 let inactivityTimeout;
 let authUser;
+const VERSION = "v1.0.0";
+const AUTH_TENANT = "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d";
+const CLIENT_ID = "47d059bf-dd89-43bd-862f-db8766ee7f8f";
 const INACTIVITY_PERIOD = 1000000; // 24 hours
 const DEFAULT_SW_PATH = "./sw.js";
 const DEFAULT_SW_SCOPE = "./";
@@ -30,11 +34,15 @@ const database = firebase.database();
 //===========================
 // Config object to be passed to Msal on creation
 const hostname = window.location.hostname;
+const redirectUri = hostname === "localhost" 
+    ? `http://${hostname}:5501/web-app/index.html` 
+    : `https://${hostname}/web-app/index.html`;
+
 const msalConfig = {
     auth: {
-        clientId: "47d059bf-dd89-43bd-862f-db8766ee7f8f",
-        authority: "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d",
-        redirectUri: `https://${hostname}/web-app/index.html`
+        clientId: CLIENT_ID,
+        authority: AUTH_TENANT,
+        redirectUri: redirectUri
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
@@ -67,14 +75,10 @@ const msalConfig = {
 };
 
 // Add here scopes for id token to be used at MS Identity Platform endpoints.
-const loginRequest = {
-    scopes: ["User.Read"]
-};
+const loginRequest = { scopes: ["User.Read"] };
 
 // Add here the endpoints for MS Graph API services you would like to use.
-const graphConfig = {
-    graphMeEndpoint: "https://graph.microsoft.com/v1.0/me"
-};
+const graphConfig = { graphMeEndpoint: "https://graph.microsoft.com/v1.0/me" };
 
 
 //===========================
@@ -156,7 +160,7 @@ async function getTokenRedirect(request, account) {
 
 // Helper function to call MS Graph API endpoint 
 // using authorization bearer token scheme
-async function callMSGraph(endpoint, accessToken, method = 'GET', payload = null, isPhoto = false) {
+async function callMSGraph(endpoint, accessToken, method = 'GET', payload = null) {
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;
 
@@ -175,24 +179,13 @@ async function callMSGraph(endpoint, accessToken, method = 'GET', payload = null
     }
 
     return fetch(endpoint, options)
-        .then(response => isPhoto ? response.blob() : response.json())
-        .then(data => {
-            if (isPhoto) {
-                // Convert blob to base64
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(data);
-                });
-            } else {
-                return data;
-            }
-        })
+        .then(response => response.json())
+        .then(data => data)
         .catch(error => console.error(error));
 }
 async function seeProfileRedirect() {
     const currentAcc = myMSALObj.getAccountByHomeId(accountId);
+
     if (currentAcc) {
         const response = await getTokenRedirect(loginRequest, currentAcc).catch(error => {
             console.log(error);
@@ -206,12 +199,16 @@ async function seeProfileRedirect() {
 }
 
 function initializeApp() {
+    const versionLink = document.getElementById('version_link');
+    if (versionLink) {
+        versionLink.innerText = VERSION;
+    }
     const msalUserInfo = JSON.parse(sessionStorage.getItem('msalUserInfo'));
     if (msalUserInfo) {
         sessionStorage.setItem('authUser', JSON.stringify(msalUserInfo));
 
         // Set the displayName to the element with ID 'username-link'
-        const usernameLink = document.getElementById('username-link');
+        const usernameLink = document.getElementById('username_link');
         if (usernameLink) {
             usernameLink.innerText = msalUserInfo.displayName;
         }
@@ -428,7 +425,7 @@ window.addEventListener('load', () => {
     clearBadgeCount();
 });
 
-document.getElementById('unsubscribe-link').addEventListener('click', (event) => {
+document.getElementById('unsubscribe_link').addEventListener('click', (event) => {
     event.preventDefault();
     unsubscribeNotifications();
 });

@@ -5,10 +5,11 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
 .nav-tabs {padding: 0 5px 10px 5px;}
 .nav-item .active { background-color: #bebebe !important; color: #000000; border-radius: 6px;}
 .nav a { text-decoration: none;}
+.nav-version-link{float: right;}
 @media (max-width: 390px) { .nav-deactivate { display: none;}}
 @media (max-width: 576px) { .nav-deactivate { display: none;}}
 @media (min-width: 768px) { .nav-username {display: none;}}
-@media (max-width: 992px) {}
+@media (max-width: 992px) { .nav-version-link{float: left;}}
 @media (max-width: 1200px){}
 
 .container-fluid {
