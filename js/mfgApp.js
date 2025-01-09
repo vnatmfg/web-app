@@ -34,7 +34,7 @@ const msalConfig = {
     auth: {
         clientId: "47d059bf-dd89-43bd-862f-db8766ee7f8f",
         authority: "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d",
-        // redirectUri: `https://${hostname}/web-app`
+        redirectUri: `https://${hostname}/web-app`
     },
     cache: {
         cacheLocation: "sessionStorage", // This configures where your cache will be stored
@@ -68,7 +68,7 @@ const msalConfig = {
 
 // Add here scopes for id token to be used at MS Identity Platform endpoints.
 const loginRequest = {
-    scopes: ["openid", "profile", "User.Read"]
+    scopes: ["User.Read"]
 };
 
 // Add here the endpoints for MS Graph API services you would like to use.
@@ -227,7 +227,7 @@ function initializeApp() {
         }
     } else {
         console.log('User not authenticated, redirecting...');
-        signIn();
+        signIn("loginPopup");
     }
 }
 
