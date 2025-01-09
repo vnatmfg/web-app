@@ -64,8 +64,10 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   padding: 15px;
+  display: block;
+  height: calc(100vh - 100px);
+  overflow: auto;
 }
-
 .notification-container h3 {
   margin-top: 0;
 }
