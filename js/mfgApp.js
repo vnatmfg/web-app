@@ -6,7 +6,7 @@
 let serviceWorkerRegistration;
 let inactivityTimeout;
 let authUser;
-const VERSION = "v1.0.0";
+const VERSION = "v1.0.1";
 const AUTH_TENANT = "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d";
 const CLIENT_ID = "47d059bf-dd89-43bd-862f-db8766ee7f8f";
 const INACTIVITY_PERIOD = 1000000; // 24 hours
@@ -108,7 +108,7 @@ const myMSALObj = new msal.PublicClientApplication(msalConfig);
 // Register Callbacks for Redirect flow
 myMSALObj.handleRedirectPromise().then(handleResponse).catch((error) => {
     console.log(error);
-});
+}).finally(hideSpinner);
 
 function handleResponse(resp) {
     if (resp !== null) {
@@ -127,33 +127,40 @@ function handleResponse(resp) {
         }
     }
 }
+function showSpinner() {
+    document.getElementById("spinner").style.display = "block";
+}
+
+function hideSpinner() {
+    document.getElementById("spinner").style.display = "none";
+}
 
 async function signIn(method) {
+    showSpinner();
     signInType = isIE ? "loginRedirect" : method;
     if (signInType === "loginPopup") {
         return myMSALObj.loginPopup(loginRequest).then(handleResponse).catch(function (error) {
             console.log(error);
-        });
+        }).finally(hideSpinner);
     } else if (signInType === "loginRedirect") {
-        return myMSALObj.loginRedirect(loginRequest);
+        return myMSALObj.loginRedirect(loginRequest).finally(hideSpinner);
     }
 }
 
 // This function can be removed if you do not need to support IE
 async function getTokenRedirect(request, account) {
+    showSpinner();
     request.account = account;
     return await myMSALObj.acquireTokenSilent(request).catch(async (error) => {
         console.log("silent token acquisition fails.");
         if (error instanceof msal.InteractionRequiredAuthError) {
-            // fallback to interaction when silent call fails
             console.log("acquiring token using redirect");
-            myMSALObj.acquireTokenRedirect(request);
+            return myMSALObj.acquireTokenRedirect(request);
         } else {
             console.error(error);
         }
-    });
+    }).finally(hideSpinner);
 }
-
 //===========================
 // MS Graph API call
 //===========================
@@ -197,7 +204,6 @@ async function seeProfileRedirect() {
         }
     }
 }
-
 function initializeApp() {
     const versionLink = document.getElementById('version_link');
     if (versionLink) {
@@ -227,7 +233,6 @@ function initializeApp() {
         signIn("loginPopup");
     }
 }
-
 const getToken = (registration) => {
     messaging
         .getToken({
@@ -438,8 +443,18 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error("Error loading base64 image:", error);
         }
     };
-    loadBase64Image("q1-img", "images/ShiftCalendar_2025_Q1.txt");
-    loadBase64Image("q2-img", "images/ShiftCalendar_2025_Q2.txt");
-    loadBase64Image("q3-img", "images/ShiftCalendar_2025_Q3.txt");
-    loadBase64Image("q4-img", "images/ShiftCalendar_2025_Q4.txt");
+
+    showSpinner();
+
+    Promise.all([
+        loadBase64Image("q1-img", "images/ShiftCalendar_2025_Q1.txt"),
+        loadBase64Image("q2-img", "images/ShiftCalendar_2025_Q2.txt"),
+        loadBase64Image("q3-img", "images/ShiftCalendar_2025_Q3.txt"),
+        loadBase64Image("q4-img", "images/ShiftCalendar_2025_Q4.txt")
+    ]).then(() => {
+        hideSpinner();
+    }).catch(error => {
+        console.error("Error loading images:", error);
+        hideSpinner();
+    });
 });

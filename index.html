@@ -25,7 +25,7 @@
   <add-to-home-screen></add-to-home-screen>
   <script type="module" src="js/AddToHomeScreen.js"></script>
   <nav class="navbar navbar-expand-md navbar-dark mb-4 draggable" style="background-color: #0071c5;"">
-      <a class=" navbar-brand" href="#" onclick="location.reload(); return false;">MFG</a>
+        <a class=" navbar-brand" href="#" onclick="location.reload(); return false;">MFG</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
       aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -51,6 +51,7 @@
       </ul>
     </div>
   </nav>
+  <div id="spinner" class="spinner" style="display: none;"></div>
   <main role="main" class="container-fluid" hidden>
     <div class="row">
       <div class="col" style="margin: 0; padding: 0;">
@@ -58,8 +59,9 @@
         <!-- Nav tabs -->
         <!-- <ul class="nav nav-tabs" id="myTab" role="tablist" style="vertical-align: top; margin-left: 5px;"> -->
         <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist" style="vertical-align: top; margin-left: 5px;">
-          <li class="nav-item nav-activate" style="float:left; padding-top: 2px;"><a href="#q1" role="tab" class="active"
-              aria-controls="q1" data-toggle="tab" style="padding: 8px 15px;white-space: nowrap;">Q1-2025</a></li>
+          <li class="nav-item nav-activate" style="float:left; padding-top: 2px;"><a href="#q1" role="tab"
+              class="active" aria-controls="q1" data-toggle="tab"
+              style="padding: 8px 15px;white-space: nowrap;">Q1-2025</a></li>
           <li class="nav-item nav-activate" style="float:left; padding-top: 2px;"><a href="#q2" role="tab"
               aria-controls="q1" data-toggle="tab" style="padding: 8px 15px;white-space: nowrap;">Q2-2025</a></li>
           <li class="nav-item nav-deactivate" style="float:left; padding-top: 2px;"><a href="#q3" role="tab"
@@ -72,28 +74,32 @@
           <div role="tabpanel" class="tab-pane fade show active" id="q1">
             <div class="row" style="margin: 0; padding: 0;">
               <div class="col">
-                <img id="q1-img" alt="Q1" style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
+                <img id="q1-img" alt="Q1"
+                  style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
               </div>
             </div>
           </div>
           <div role="tabpanel" class="tab-pane fade show" id="q2">
             <div class="row" style="margin: 0; padding: 0;">
               <div class="col">
-                <img id="q2-img" alt="Q2" style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
+                <img id="q2-img" alt="Q2"
+                  style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
               </div>
             </div>
           </div>
           <div role="tabpanel" class="tab-pane fade show" id="q3">
             <div class="row" style="margin: 0; padding: 0;">
               <div class="col">
-                <img id="q3-img" alt="Q3" style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
+                <img id="q3-img" alt="Q3"
+                  style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
               </div>
             </div>
           </div>
           <div role="tabpanel" class="tab-pane fade show" id="q4">
             <div class="row" style="margin: 0; padding: 0;">
               <div class="col">
-                <img id="q4-img" alt="Q4" style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
+                <img id="q4-img" alt="Q4"
+                  style="object-fit: contain; width: 100%; position: relative; margin-top: -25px; z-index: -1;">
               </div>
             </div>
           </div>
