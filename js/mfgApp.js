@@ -373,7 +373,13 @@ function displayStoredNotifications() {
 
     notifications.forEach((notification, index) => {
         const listItem = document.createElement('li');
-        listItem.textContent = `${notification.title}: ${notification.body}`;
+        const title = document.createElement('strong');
+        title.textContent = notification.title;
+        const body = document.createElement('span');
+        body.textContent = `: ${notification.body}`;
+        
+        listItem.appendChild(title);
+        listItem.appendChild(body);
         notificationList.appendChild(listItem);
     });
 }
@@ -515,4 +521,12 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         toggleNotificationContainer();
     });
+    window.addEventListener("click", function(event){
+        event.preventDefault();
+        const notificationContainer = document.getElementById("notification-container");
+        const notificationBell = document.getElementById("notification_bell");
+        if (!notificationContainer.contains(event.target) && !notificationBell.contains(event.target)) {
+            notificationContainer.style.display = "none";
+        }
+    })
 });

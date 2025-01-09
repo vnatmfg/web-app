@@ -41,7 +41,8 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
   position: fixed;
   top: 50px;
   right: 10px;
-  width: 300px;
+  width: 500px;
+  max-width: fit-content;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -57,6 +58,7 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
 .notification-container ul {
   list-style-type: none;
   padding: 0;
+  font-size: smaller;
 }
 
 .notification-container ul li {
