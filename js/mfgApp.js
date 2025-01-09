@@ -132,7 +132,7 @@ function showSpinner() {
 }
 
 function hideSpinner() {
-    // document.getElementById("spinner").style.display = "none";
+    document.getElementById("spinner").style.display = "none";
 }
 
 async function signIn(method) {
