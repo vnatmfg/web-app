@@ -37,6 +37,7 @@ html { -webkit-box-sizing: border-box; -moz-box-sizing: border-box;  box-sizing:
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;

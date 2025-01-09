@@ -352,6 +352,26 @@ function showMessage(message, showAllowButton = false) {
         }
     }, 5000); // Remove the message after 5 seconds
 }
+function storeNotification(notification) {
+    let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+    notifications.push(notification);
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+}
+function displayStoredNotifications() {
+    const notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+    const notificationList = document.getElementById('notification-list');
+    notificationList.innerHTML = '';
+
+    notifications.forEach((notification, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${notification.title}: ${notification.body}`;
+        notificationList.appendChild(listItem);
+    });
+}
+function clearNotifications() {
+    localStorage.removeItem('notifications');
+    displayStoredNotifications();
+}
 function requestNotificationPermission() {
     if ('Notification' in window) {
         const requestPermission = async () => {
@@ -408,6 +428,12 @@ messaging.onMessage((payload) => {
             };
             const notification = new Notification(notificationTitle, notificationOptions);
 
+            // Show the notification message within the app
+            showMessage(payload.notification.body);
+
+            // Store the notification in localStorage
+            storeNotification(payload.notification);
+
             // Set the badge count
             if ('setAppBadge' in navigator) {
                 navigator.setAppBadge(1).catch((error) => {
@@ -428,6 +454,7 @@ window.addEventListener('load', () => {
     clearBadgeCount();
 });
 document.addEventListener("DOMContentLoaded", function() {
+    displayStoredNotifications();
     const loadBase64Image = async (imgElementId, txtFilePath) => {
         try {
             const response = await fetch(txtFilePath);
