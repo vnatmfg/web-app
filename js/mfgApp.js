@@ -265,7 +265,7 @@ const getToken = (registration) => {
 };
 const unsubscribeNotifications = function () {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then((registration) => {
+        navigator.serviceWorker.ready.then((registration) => {            
             const messaging = firebase.messaging();
             messaging.getToken({
                 vapidKey: DEFAULT_VAPID_KEY,
@@ -384,7 +384,6 @@ if (('serviceWorker' in navigator) &&
         .then((registration) => {
             console.log("Registration successful, scope is:", registration.scope);
             serviceWorkerRegistration = registration;
-            // getToken(registration);
 
             // Add event listeners for beforeunload and unload events
             window.addEventListener('beforeunload', () => {
@@ -428,10 +427,7 @@ messaging.onMessage((payload) => {
 window.addEventListener('load', () => {
     clearBadgeCount();
 });
-document.getElementById('unsubscribe_link').addEventListener('click', (event) => {
-    event.preventDefault();
-    unsubscribeNotifications();
-});
+
 document.addEventListener("DOMContentLoaded", function() {
     const loadBase64Image = async (imgElementId, txtFilePath) => {
         try {
@@ -456,5 +452,28 @@ document.addEventListener("DOMContentLoaded", function() {
     }).catch(error => {
         console.error("Error loading images:", error);
         // hideSpinner();
+    }); 
+
+
+    const subscribeLink = document.getElementById("unsubscribe_link");
+
+    // Function to toggle subscription status
+    const toggleSubscription = () => {
+        if (subscribeLink.textContent === "Unsubscribe Notifications") {
+            subscribeLink.textContent = "Subscribe Notifications";
+            unsubscribeNotifications();
+        } else {
+            subscribeLink.textContent = "Unsubscribe Notifications";
+            if (serviceWorkerRegistration) {
+                getToken(serviceWorkerRegistration);
+            }
+        }
+    };
+
+    // Add event listener to the link
+    subscribeLink.addEventListener("click", function(event) {
+        event.preventDefault();
+        toggleSubscription();
     });
+
 });
