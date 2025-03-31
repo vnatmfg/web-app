@@ -6,7 +6,7 @@
 let serviceWorkerRegistration;
 let inactivityTimeout;
 let authUser;
-const VERSION = "v1.0.3";
+const VERSION = "v1.0.4";
 const AUTH_TENANT = "https://login.microsoftonline.com/46c98d88-e344-4ed4-8496-4ed7712e255d";
 const CLIENT_ID = "47d059bf-dd89-43bd-862f-db8766ee7f8f";
 const INACTIVITY_PERIOD = 1000000; // 24 hours
