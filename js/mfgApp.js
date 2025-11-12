@@ -498,9 +498,9 @@ document.addEventListener("DOMContentLoaded", function() {
     };
     showSpinner();
     Promise.all([
-        loadBase64Image("q1-img", "images/ShiftCalendar_2025_Q1.txt"),
-        loadBase64Image("q2-img", "images/ShiftCalendar_2025_Q2.txt"),
-        loadBase64Image("q3-img", "images/ShiftCalendar_2025_Q3.txt"),
+        loadBase64Image("q1-img", "images/ShiftCalendar_2026_Q1.txt"),
+        loadBase64Image("q2-img", "images/ShiftCalendar_2026_Q2.txt"),
+        loadBase64Image("q3-img", "images/ShiftCalendar_2026_Q3.txt"),
         loadBase64Image("q4-img", "images/ShiftCalendar_2025_Q4.txt")
     ]).then(() => {
         setTimeout(() => {
